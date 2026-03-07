@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendataan RT/RW Rambatan Wetan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script type="module">
+        // --- KONFIGURASI SUPABASE ---
+        const supabaseUrl = "https://vhidgkiaaxhetkchzapu.supabase.co"; 
+        const supabaseKey = "sb_publishable_m0e2gJoMYRUYijTclkz-RA_WFg9ySq6"; 
+        
+        let supabase = null;
+        let dataWarga = []; 
+        let session = null;
+        
+        if (supabaseUrl && supabaseKey) {
+            try {
+                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            } catch (err) {
+                console.error("Gagal menginisialisasi Supabase:", err);
+            }
+        }
+
+        window.togglePassword = () => {
+            const passwordInp = document.getElementById('password');
+            const eyeOpen = document.getElementById('eyeOpen');
+            const eyeClosed = document.getElementById('eyeClosed');
+            
+            if (passwordInp.type === 'password') {
+                passwordInp.type = 'text';
+                eyeOpen.classList.add('hidden');
+                eyeClosed.classList.remove('hidden');
+            } else {
+                passwordInp.type = 'password';
+                eyeOpen.classList.remove('hidden');
+                eyeClosed.classList.add('hidden');
+            }
+        };
+
+        window.handleLogin = async (e) => {
+            e.preventDefault();
+            const userInp = document.getElementById('username').value;
+            const passInp = document.getElementById('password').value;
+            const errorMsg = document.getElementById('loginError');
+            const btn = document.getElementById('loginBtn');
+
+            if (userInp === "Ameth" && passInp === "Kliwon03") {
+                btn.innerText = "Memvalidasi...";
+                btn.disabled = true;
+                errorMsg.classList.add('hidden');
+                session = { user: { email: 'admin@rambatanwetan.desa' } };
+                updateUI();
+                fetchData();
+            } else {
+                errorMsg.innerText = "Username atau Password salah!";
+                errorMsg.classList.remove('hidden');
+            }
+        };
+
+        window.handleLogout = () => {
+            session = null;
+            updateUI();
+        };
+
+        function updateUI() {
+            const loginSection = document.getElementById('loginSection');
+            const appContent = document.getElementById('appContent');
+            const nav = document.getElementById('mainNav');
+
+            if (session) {
+                loginSection.classList.add('hidden');
+                appContent.classList.remove('hidden');
+                nav.classList.remove('hidden');
+            } else {
+                loginSection.classList.remove('hidden');
+                appContent.classList.add('hidden');
+                nav.classList.add('hidden');
+                document.getElementById('loginForm').reset();
+                document.getElementById('loginBtn').innerText = "Masuk Sekarang";
+                document.getElementById('loginBtn').disabled = false;
+            }
+        }
+
+        async function fetchData() {
+            if (supabase) {
+                const { data, error } = await supabase
+                    .from('warga')
+                    .select('*')
+                    .order('noWilayah', { ascending: true });
+                if (!error) dataWarga = data || [];
+            }
+            window.renderTable();
+        }
+
+        window.saveData = async (citizenData) => {
+            if (supabase) {
+                const { error } = await supabase.from('warga').insert([citizenData]);
+                if (!error) fetchData();
+            } else {
+                dataWarga.push({ ...citizenData, id: Date.now().toString() });
+                window.renderTable();
+            }
+        };
+
+        window.deleteCitizen = async (id) => {
+            if (supabase) {
+                const { error } = await supabase.from('warga').delete().eq('id', id);
+                if (!error) fetchData();
+            } else {
+                dataWarga = dataWarga.filter(w => w.id !== id);
+                window.renderTable();
+            }
+        };
+
+        window.getDataWarga = () => dataWarga;
+
+        window.printDocument = () => {
+            const date = new Date().toLocaleDateString('id-ID', { 
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            });
+            const printDateEl = document.getElementById('printDate');
+            if (printDateEl) printDateEl.innerText = "Dicetak pada: " + date;
+            window.print();
+        };
+
+        window.downloadPDFA4 = () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const date = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+            doc.setFontSize(16);
+            doc.text("LAPORAN DATA WARGA DESA RAMBATAN WETAN", 105, 15, { align: 'center' });
+            doc.setFontSize(10);
+            doc.text("Kecamatan Sindang, Kabupaten Indramayu", 105, 20, { align: 'center' });
+            doc.text(`Tanggal Cetak: ${date}`, 105, 25, { align: 'center' });
+            doc.line(15, 28, 195, 28);
+            const rows = dataWarga.map((w, i) => [i + 1, w.nama, `${w.tipeWilayah} ${String(w.noWilayah).padStart(2, '0')}`, w.rekening, w.hp]);
+            doc.autoTable({
+                head: [['No', 'Nama Lengkap', 'Wilayah', 'No. Rekening', 'No. HP']],
+                body: rows,
+                startY: 35,
+                theme: 'grid',
+                headStyles: { fillColor: [30, 64, 175], textColor: 255 },
+                styles: { fontSize: 9, cellPadding: 3 }
+            });
+            doc.save(`Laporan_Warga_${date.replace(/ /g, '_')}.pdf`);
+        };
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        @media print {
+            @page { size: A4; margin: 15mm; }
+            .no-print { display: none !important; }
+            #appContent { display: block !important; }
+            #printHeader { display: block !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+    <header id="mainNav" class="bg-blue-800 text-white p-4 shadow-md hidden no-print">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-lg font-bold tracking-tight">RAMBATAN WETAN</h1>
+            <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors">Keluar</button>
+        </div>
+    </header>
+
+    <div id="loginSection" class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full border border-gray-100">
+            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002-2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 text-center mb-1">Akses Sistem</h2>
+            <p class="text-gray-500 text-center mb-6 text-sm">Gunakan kredensial admin Anda.</p>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Username</label>
+                    <input type="text" id="username" required placeholder="" class="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Password</label>
+                    <div class="relative">
+                        <input type="password" id="password" required placeholder="" class="w-full border rounded-xl px-4 py-3 pr-12 outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                        <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400">
+                            <svg id="eyeOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            <svg id="eyeClosed" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"></path></svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="loginError" class="hidden text-red-500 text-xs text-center font-semibold italic"></div>
+                <button id="loginBtn" type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg mt-2">
+                    Masuk Sekarang
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="appContent" class="hidden">
+        <div id="printHeader" class="hidden text-center border-b-2 border-black pb-4 mb-6">
+            <h1 class="text-2xl font-bold uppercase">Laporan Data Warga Desa Rambatan Wetan</h1>
+            <p class="text-sm">Kecamatan Sindang, Kabupaten Indramayu</p>
+            <p id="printDate" class="text-xs italic mt-2 text-gray-600"></p>
+        </div>
+
+        <main class="container mx-auto p-4 md:p-8">
+            <div id="dataFormContainer" class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-200 no-print">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-blue-800">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                    Tambah Data Warga
+                </h2>
+                <form id="dataForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <input type="text" id="nama" placeholder="Nama Lengkap" required class="border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="flex gap-2">
+                        <select id="tipeWilayah" class="border rounded-lg p-2.5 bg-white w-2/3 outline-none">
+                            <option value="RW">RW</option>
+                            <option value="RT">RT</option>
+                        </select>
+                        <input type="number" id="noWilayah" placeholder="No" required class="border rounded-lg p-2.5 w-1/3 outline-none">
+                    </div>
+                    <input type="text" id="rekening" placeholder="Nomor Rekening" required class="border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="hp" placeholder="No HP" required class="border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="alamat" placeholder="Alamat" required class="border rounded-lg p-2.5 md:col-span-2 outline-none focus:ring-2 focus:ring-blue-500">
+                    <button type="submit" class="bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-md">Simpan</button>
+                </form>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="p-4 bg-gray-50 border-b flex flex-col md:flex-row justify-between items-center gap-4 no-print">
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="Cari nama atau rekening..." class="border rounded-lg px-4 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none w-full">
+                        <select id="filterWilayah" onchange="renderTable()" class="border rounded-lg px-2 py-1.5 text-sm bg-white outline-none">
+                            <option value="Semua">Semua Wilayah</option>
+                            <option value="RW">Hanya RW</option>
+                            <option value="RT">Hanya RT</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="printDocument()" class="bg-blue-50 text-blue-600 border border-blue-200 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-100">CETAK A4</button>
+                        <button onclick="downloadPDFA4()" class="bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100">PDF A4</button>
+                        <button onclick="exportExcel()" class="bg-green-50 text-green-600 border border-green-200 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-green-100">EXCEL</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left" id="mainTable">
+                        <thead class="bg-slate-100 text-slate-600 text-[11px] uppercase tracking-wider">
+                            <tr>
+                                <th class="px-4 py-3 border">No</th>
+                                <th class="px-4 py-3 border">Nama</th>
+                                <th class="px-4 py-3 border text-center">Wilayah</th>
+                                <th class="px-4 py-3 border">Rekening</th>
+                                <th class="px-4 py-3 border">No HP</th>
+                                <th class="px-4 py-3 border text-center no-print">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="text-sm text-gray-700"></tbody>
+                    </table>
+                </div>
+                <div id="emptyState" class="p-10 text-center text-gray-400 hidden italic">Belum ada data yang ditambahkan.</div>
+            </div>
+        </main>
+    </div>
+
+    <div id="deleteModal" class="hidden fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-xs w-full shadow-xl text-center">
+            <h3 class="font-bold text-gray-800 mb-2">Hapus Data?</h3>
+            <p class="text-gray-500 text-xs mb-6">Data ini akan dihapus permanen.</p>
+            <div class="flex gap-2">
+                <button onclick="closeModal()" class="flex-1 py-2 text-gray-400 font-semibold">Batal</button>
+                <button id="confirmBtn" class="flex-1 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tableBody = document.getElementById('tableBody');
+        const deleteModal = document.getElementById('deleteModal');
+        let activeId = null;
+
+        document.getElementById('dataForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const data = {
+                nama: document.getElementById('nama').value,
+                tipeWilayah: document.getElementById('tipeWilayah').value,
+                noWilayah: parseInt(document.getElementById('noWilayah').value),
+                rekening: document.getElementById('rekening').value,
+                hp: document.getElementById('hp').value,
+                alamat: document.getElementById('alamat').value
+            };
+            if(window.saveData) window.saveData(data);
+            this.reset();
+        });
+
+        window.renderTable = function() {
+            const rawData = (typeof window.getDataWarga === 'function') ? window.getDataWarga() : [];
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filter = document.getElementById('filterWilayah').value;
+            
+            tableBody.innerHTML = '';
+            
+            let filtered = rawData.filter(w => {
+                const matchSearch = (w.nama || "").toLowerCase().includes(search) || (w.rekening || "").includes(search);
+                const matchType = filter === "Semua" || w.tipeWilayah === filter;
+                return matchSearch && matchType;
+            });
+
+            if (filtered.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('emptyState').classList.add('hidden');
+            filtered.sort((a, b) => (a.noWilayah || 0) - (b.noWilayah || 0));
+
+            filtered.forEach((w, i) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b hover:bg-blue-50/30 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-4 py-3 border text-center text-xs text-gray-400">${i + 1}</td>
+                    <td class="px-4 py-3 border font-semibold">${w.nama}</td>
+                    <td class="px-4 py-3 border text-center font-bold text-blue-700 text-xs">${w.tipeWilayah} ${String(w.noWilayah).padStart(2, '0')}</td>
+                    <td class="px-4 py-3 border font-mono text-xs">${w.rekening}</td>
+                    <td class="px-4 py-3 border text-xs">${w.hp}</td>
+                    <td class="px-4 py-3 border text-center no-print">
+                        <button onclick="askDelete('${w.id}')" class="text-red-400 hover:text-red-600 transition-colors font-bold">
+                            Hapus
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        };
+
+        window.askDelete = (id) => { activeId = id; deleteModal.classList.remove('hidden'); };
+        window.closeModal = () => { deleteModal.classList.add('hidden'); };
+        document.getElementById('confirmBtn').onclick = () => { 
+            if(window.deleteCitizen) window.deleteCitizen(activeId); 
+            closeModal(); 
+        };
+
+        window.exportExcel = () => {
+            const data = (typeof window.getDataWarga === 'function') ? window.getDataWarga() : [];
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Warga");
+            XLSX.writeFile(wb, "DataWarga.xlsx");
+        };
+    </script>
+</body>
+</html>
