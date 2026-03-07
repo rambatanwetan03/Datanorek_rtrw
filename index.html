@@ -16,13 +16,15 @@
         const supabaseUrl = "https://vhidgkiaaxhetkchzapu.supabase.co"; 
         const supabaseKey = "sb_publishable_m0e2gJoMYRUYijTclkz-RA_WFg9ySq6"; 
         
-        let supabase = null;
+        // Perbaikan: Menghapus deklarasi ganda 'supabase'
+        let supabaseClient = null; 
         let dataWarga = []; 
         let session = null;
         
         if (supabaseUrl && supabaseKey) {
             try {
-                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                // Inisialisasi klien supabase ke variabel yang unik
+                supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
             } catch (err) {
                 console.error("Gagal menginisialisasi Supabase:", err);
             }
@@ -89,8 +91,8 @@
         }
 
         async function fetchData() {
-            if (supabase) {
-                const { data, error } = await supabase
+            if (supabaseClient) {
+                const { data, error } = await supabaseClient
                     .from('warga')
                     .select('*')
                     .order('noWilayah', { ascending: true });
@@ -100,8 +102,8 @@
         }
 
         window.saveData = async (citizenData) => {
-            if (supabase) {
-                const { error } = await supabase.from('warga').insert([citizenData]);
+            if (supabaseClient) {
+                const { error } = await supabaseClient.from('warga').insert([citizenData]);
                 if (!error) fetchData();
             } else {
                 dataWarga.push({ ...citizenData, id: Date.now().toString() });
@@ -110,8 +112,8 @@
         };
 
         window.deleteCitizen = async (id) => {
-            if (supabase) {
-                const { error } = await supabase.from('warga').delete().eq('id', id);
+            if (supabaseClient) {
+                const { error } = await supabaseClient.from('warga').delete().eq('id', id);
                 if (!error) fetchData();
             } else {
                 dataWarga = dataWarga.filter(w => w.id !== id);
