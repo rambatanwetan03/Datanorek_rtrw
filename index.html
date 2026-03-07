@@ -20,58 +20,74 @@
         let dataWarga = []; 
         let session = null;
         
+        // Inisialisasi Supabase
         if (supabaseUrl && supabaseKey) {
             try {
                 supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+                console.log("Supabase terhubung");
             } catch (err) {
                 console.error("Gagal menginisialisasi Supabase:", err);
             }
         }
 
-        // Fungsi untuk mengambil data terbaru
+        // Fungsi untuk mengambil data terbaru dari tabel "Warga"
         window.fetchData = async () => {
             if (supabaseClient) {
                 const { data, error } = await supabaseClient
-                    .from('warga')
+                    .from('Warga') 
                     .select('*')
                     .order('noWilayah', { ascending: true });
+                
                 if (!error) {
                     dataWarga = data || [];
                 } else {
                     console.error("Fetch error:", error);
                 }
             }
-            // Panggil render setelah data siap
+            // Trigger pembaruan tampilan tabel
             if (typeof window.renderTable === 'function') {
                 window.renderTable();
             }
         };
 
-        // Fungsi simpan data yang diperbaiki
+        // Fungsi simpan data yang disesuaikan dengan skema tabel: "Nama" (Huruf Besar)
         window.saveData = async (citizenData) => {
             if (supabaseClient) {
-                const { error } = await supabaseClient.from('warga').insert([citizenData]);
+                // Menyiapkan payload sesuai skema SQL: "Nama", "tipeWilayah", dll.
+                const payload = {
+                    Nama: citizenData.nama,
+                    tipeWilayah: citizenData.tipeWilayah,
+                    noWilayah: citizenData.noWilayah,
+                    rekening: citizenData.rekening,
+                    hp: citizenData.hp,
+                    alamat: citizenData.alamat
+                };
+
+                const { error } = await supabaseClient.from('Warga').insert([payload]);
+                
                 if (error) {
                     console.error("Error saving to Supabase:", error);
-                    alert("Gagal menyimpan ke database!");
+                    alert("Gagal menyimpan ke database! Pastikan RLS di Supabase mengizinkan insert.");
                 } else {
-                    // Berhasil simpan, ambil data terbaru
+                    // Refresh data setelah berhasil simpan
                     await window.fetchData();
                 }
             } else {
-                // Mode Demo/Lokal
-                const newData = { ...citizenData, id: Date.now().toString() };
+                // Mode Lokal (jika API tidak tersedia)
+                const newData = { ...citizenData, Nama: citizenData.nama, id: Date.now() };
                 dataWarga.push(newData);
                 window.renderTable();
             }
         };
 
+        // Fungsi hapus data berdasarkan ID
         window.deleteCitizen = async (id) => {
             if (supabaseClient) {
-                const { error } = await supabaseClient.from('warga').delete().eq('id', id);
+                const { error } = await supabaseClient.from('Warga').delete().eq('id', id);
                 if (!error) {
                     await window.fetchData();
                 } else {
+                    console.error("Delete error:", error);
                     alert("Gagal menghapus data!");
                 }
             } else {
@@ -80,9 +96,10 @@
             }
         };
 
-        // Getter agar skrip di luar module bisa baca dataWarga
+        // Ekspos data ke scope global untuk renderTable()
         window.getDataWarga = () => dataWarga;
 
+        // Logika Login Sederhana
         window.handleLogin = async (e) => {
             e.preventDefault();
             const userInp = document.getElementById('username').value;
@@ -129,7 +146,8 @@
     </script>
 
     <script>
-        // Fungsi pembantu UI (Global Scope)
+        // --- LOGIKA UI & TABEL ---
+        
         window.togglePassword = () => {
             const passwordInp = document.getElementById('password');
             const eyeOpen = document.getElementById('eyeOpen');
@@ -146,12 +164,55 @@
             }
         };
 
-        window.printDocument = () => {
-            const date = new Date().toLocaleDateString('id-ID', { 
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+        window.renderTable = function() {
+            const tableBody = document.getElementById('tableBody');
+            const rawData = (typeof window.getDataWarga === 'function') ? window.getDataWarga() : [];
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filter = document.getElementById('filterWilayah').value;
+            
+            tableBody.innerHTML = '';
+            
+            let filtered = rawData.filter(w => {
+                // Mendukung properti "Nama" (skema baru) atau "nama" (skema lama/lokal)
+                const currentName = w.Nama || w.nama || "";
+                const nameMatch = currentName.toLowerCase().includes(search);
+                const accMatch = (w.rekening || "").includes(search);
+                const typeMatch = filter === "Semua" || w.tipeWilayah === filter;
+                return (nameMatch || accMatch) && typeMatch;
             });
+
+            if (filtered.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+            } else {
+                document.getElementById('emptyState').classList.add('hidden');
+                // Urutkan berdasarkan noWilayah
+                filtered.sort((a, b) => (a.noWilayah || 0) - (b.noWilayah || 0));
+
+                filtered.forEach((w, i) => {
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b hover:bg-blue-50/30 transition-colors";
+                    tr.innerHTML = `
+                        <td class="px-4 py-3 border text-center text-xs text-gray-400">${i + 1}</td>
+                        <td class="px-4 py-3 border font-semibold">${w.Nama || w.nama}</td>
+                        <td class="px-4 py-3 border text-center font-bold text-blue-700 text-xs">${w.tipeWilayah || ''} ${String(w.noWilayah || '').padStart(2, '0')}</td>
+                        <td class="px-4 py-3 border font-mono text-xs text-gray-600">${w.rekening || '-'}</td>
+                        <td class="px-4 py-3 border text-xs">${w.hp || '-'}</td>
+                        <td class="px-4 py-3 border text-center no-print">
+                            <button onclick="askDelete('${w.id}')" class="text-red-400 hover:text-red-600 font-bold px-2 py-1">
+                                Hapus
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+            }
+        };
+
+        // Fungsi Ekspor & Print
+        window.printDocument = () => {
+            const date = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
             const printDateEl = document.getElementById('printDate');
-            if (printDateEl) printDateEl.innerText = "Dicetak pada: " + date;
+            if (printDateEl) printDateEl.innerText = "Tanggal Cetak: " + date;
             window.print();
         };
 
@@ -160,22 +221,68 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'mm', 'a4');
             const date = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+            
             doc.setFontSize(16);
             doc.text("LAPORAN DATA WARGA DESA RAMBATAN WETAN", 105, 15, { align: 'center' });
             doc.setFontSize(10);
-            doc.text("Kecamatan Sindang, Kabupaten Indramayu", 105, 20, { align: 'center' });
-            doc.text(`Tanggal Cetak: ${date}`, 105, 25, { align: 'center' });
-            doc.line(15, 28, 195, 28);
-            const rows = dataWarga.map((w, i) => [i + 1, w.nama, `${w.tipeWilayah} ${String(w.noWilayah).padStart(2, '0')}`, w.rekening, w.hp]);
+            doc.text(`Kecamatan Sindang - Tanggal: ${date}`, 105, 22, { align: 'center' });
+            
+            const rows = dataWarga.map((w, i) => [
+                i + 1, 
+                w.Nama || w.nama, 
+                `${w.tipeWilayah} ${w.noWilayah}`, 
+                w.rekening, 
+                w.hp
+            ]);
+
             doc.autoTable({
-                head: [['No', 'Nama Lengkap', 'Wilayah', 'No. Rekening', 'No. HP']],
+                head: [['No', 'Nama', 'Wilayah', 'Rekening', 'HP']],
                 body: rows,
-                startY: 35,
+                startY: 30,
                 theme: 'grid',
-                headStyles: { fillColor: [30, 64, 175], textColor: 255 },
-                styles: { fontSize: 9, cellPadding: 3 }
+                headStyles: { fillColor: [30, 64, 175] }
             });
-            doc.save(`Laporan_Warga_${date.replace(/ /g, '_')}.pdf`);
+            doc.save(`Warga_Rambatan_Wetan_${date}.pdf`);
+        };
+
+        window.exportExcel = () => {
+            const data = window.getDataWarga() || [];
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Data Warga");
+            XLSX.writeFile(wb, "DataWarga_RambatanWetan.xlsx");
+        };
+
+        // Modal Hapus
+        let activeId = null;
+        window.askDelete = (id) => { 
+            activeId = id; 
+            document.getElementById('deleteModal').classList.remove('hidden'); 
+        };
+        window.closeModal = () => { document.getElementById('deleteModal').classList.add('hidden'); };
+        
+        window.confirmDelete = () => {
+            if(window.deleteCitizen) window.deleteCitizen(activeId);
+            closeModal();
+        };
+
+        // Listener Form
+        window.onload = () => {
+            document.getElementById('dataForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = {
+                    nama: document.getElementById('nama').value,
+                    tipeWilayah: document.getElementById('tipeWilayah').value,
+                    noWilayah: parseInt(document.getElementById('noWilayah').value),
+                    rekening: document.getElementById('rekening').value,
+                    hp: document.getElementById('hp').value,
+                    alamat: document.getElementById('alamat').value
+                };
+                if(window.saveData) {
+                    window.saveData(formData);
+                    this.reset();
+                }
+            });
         };
     </script>
 
@@ -183,10 +290,10 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
         @media print {
-            @page { size: A4; margin: 15mm; }
             .no-print { display: none !important; }
             #appContent { display: block !important; }
             #printHeader { display: block !important; }
+            body { background: white; }
         }
     </style>
 </head>
@@ -232,16 +339,15 @@
 
     <div id="appContent" class="hidden">
         <div id="printHeader" class="hidden text-center border-b-2 border-black pb-4 mb-6">
-            <h1 class="text-2xl font-bold uppercase">Laporan Data Warga Desa Rambatan Wetan</h1>
-            <p class="text-sm">Kecamatan Sindang, Kabupaten Indramayu</p>
+            <h1 class="text-2xl font-bold uppercase">Data Warga Desa Rambatan Wetan</h1>
             <p id="printDate" class="text-xs italic mt-2 text-gray-600"></p>
         </div>
 
         <main class="container mx-auto p-4 md:p-8">
             <div id="dataFormContainer" class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-200 no-print">
                 <h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-blue-800">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-                    Tambah Data Warga
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Tambah Data Baru
                 </h2>
                 <form id="dataForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <input type="text" id="nama" placeholder="Nama Lengkap" required class="border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500">
@@ -254,8 +360,8 @@
                     </div>
                     <input type="text" id="rekening" placeholder="Nomor Rekening" required class="border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500">
                     <input type="text" id="hp" placeholder="No HP" required class="border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500">
-                    <input type="text" id="alamat" placeholder="Alamat" required class="border rounded-lg p-2.5 md:col-span-2 outline-none focus:ring-2 focus:ring-blue-500">
-                    <button type="submit" class="bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-md">Simpan</button>
+                    <input type="text" id="alamat" placeholder="Alamat Lengkap" required class="border rounded-lg p-2.5 md:col-span-2 outline-none focus:ring-2 focus:ring-blue-500">
+                    <button type="submit" class="bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-md">Simpan Data</button>
                 </form>
             </div>
 
@@ -265,13 +371,13 @@
                         <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="Cari nama atau rekening..." class="border rounded-lg px-4 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none w-full">
                         <select id="filterWilayah" onchange="renderTable()" class="border rounded-lg px-2 py-1.5 text-sm bg-white outline-none">
                             <option value="Semua">Semua Wilayah</option>
-                            <option value="RW">Hanya RW</option>
-                            <option value="RT">Hanya RT</option>
+                            <option value="RW">RW Saja</option>
+                            <option value="RT">RT Saja</option>
                         </select>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <button onclick="printDocument()" class="bg-blue-50 text-blue-600 border border-blue-200 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-100">CETAK A4</button>
-                        <button onclick="downloadPDFA4()" class="bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100">PDF A4</button>
+                        <button onclick="printDocument()" class="bg-white border px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-gray-50">CETAK</button>
+                        <button onclick="downloadPDFA4()" class="bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100">PDF</button>
                         <button onclick="exportExcel()" class="bg-green-50 text-green-600 border border-green-200 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-green-100">EXCEL</button>
                     </div>
                 </div>
@@ -281,111 +387,35 @@
                         <thead class="bg-slate-100 text-slate-600 text-[11px] uppercase tracking-wider">
                             <tr>
                                 <th class="px-4 py-3 border">No</th>
-                                <th class="px-4 py-3 border">Nama</th>
+                                <th class="px-4 py-3 border">Nama Lengkap</th>
                                 <th class="px-4 py-3 border text-center">Wilayah</th>
-                                <th class="px-4 py-3 border">Rekening</th>
-                                <th class="px-4 py-3 border">No HP</th>
+                                <th class="px-4 py-3 border">No. Rekening</th>
+                                <th class="px-4 py-3 border">No. HP</th>
                                 <th class="px-4 py-3 border text-center no-print">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody" class="text-sm text-gray-700"></tbody>
                     </table>
                 </div>
-                <div id="emptyState" class="p-10 text-center text-gray-400 hidden italic">Belum ada data yang ditambahkan.</div>
+                <div id="emptyState" class="p-12 text-center text-gray-400 hidden italic">Belum ada data tersedia.</div>
             </div>
         </main>
     </div>
 
-    <div id="deleteModal" class="hidden fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-6 max-w-xs w-full shadow-xl text-center">
-            <h3 class="font-bold text-gray-800 mb-2">Hapus Data?</h3>
-            <p class="text-gray-500 text-xs mb-6">Data ini akan dihapus permanen.</p>
+    <!-- Modal Konfirmasi Hapus -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-xs w-full shadow-2xl text-center">
+            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </div>
+            <h3 class="font-bold text-gray-800 text-lg mb-1">Hapus Data?</h3>
+            <p class="text-gray-500 text-xs mb-6">Tindakan ini tidak dapat dibatalkan.</p>
             <div class="flex gap-2">
-                <button onclick="closeModal()" class="flex-1 py-2 text-gray-400 font-semibold">Batal</button>
-                <button id="confirmBtn" class="flex-1 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600">Hapus</button>
+                <button onclick="closeModal()" class="flex-1 py-2 text-gray-500 font-semibold hover:bg-gray-50 rounded-lg">Batal</button>
+                <button onclick="confirmDelete()" class="flex-1 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition-colors">Ya, Hapus</button>
             </div>
         </div>
     </div>
 
-    <script>
-        const tableBody = document.getElementById('tableBody');
-        const deleteModal = document.getElementById('deleteModal');
-        let activeId = null;
-
-        // Listener form simpan
-        document.getElementById('dataForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const data = {
-                nama: document.getElementById('nama').value,
-                tipeWilayah: document.getElementById('tipeWilayah').value,
-                noWilayah: parseInt(document.getElementById('noWilayah').value),
-                rekening: document.getElementById('rekening').value,
-                hp: document.getElementById('hp').value,
-                alamat: document.getElementById('alamat').value
-            };
-            if(window.saveData) {
-                window.saveData(data);
-                this.reset();
-            }
-        });
-
-        // Fungsi render tabel yang diperbaiki
-        window.renderTable = function() {
-            const rawData = (typeof window.getDataWarga === 'function') ? window.getDataWarga() : [];
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const filter = document.getElementById('filterWilayah').value;
-            
-            tableBody.innerHTML = '';
-            
-            let filtered = rawData.filter(w => {
-                const nameMatch = (w.nama || "").toLowerCase().includes(search);
-                const accMatch = (w.rekening || "").includes(search);
-                const typeMatch = filter === "Semua" || w.tipeWilayah === filter;
-                return (nameMatch || accMatch) && typeMatch;
-            });
-
-            if (filtered.length === 0) {
-                document.getElementById('emptyState').classList.remove('hidden');
-                return;
-            }
-            
-            document.getElementById('emptyState').classList.add('hidden');
-            // Urutkan berdasarkan nomor wilayah
-            filtered.sort((a, b) => (a.noWilayah || 0) - (b.noWilayah || 0));
-
-            filtered.forEach((w, i) => {
-                const tr = document.createElement('tr');
-                tr.className = "border-b hover:bg-blue-50/30 transition-colors";
-                tr.innerHTML = `
-                    <td class="px-4 py-3 border text-center text-xs text-gray-400">${i + 1}</td>
-                    <td class="px-4 py-3 border font-semibold">${w.nama}</td>
-                    <td class="px-4 py-3 border text-center font-bold text-blue-700 text-xs">${w.tipeWilayah} ${String(w.noWilayah).padStart(2, '0')}</td>
-                    <td class="px-4 py-3 border font-mono text-xs">${w.rekening}</td>
-                    <td class="px-4 py-3 border text-xs">${w.hp}</td>
-                    <td class="px-4 py-3 border text-center no-print">
-                        <button onclick="askDelete('${w.id}')" class="text-red-400 hover:text-red-600 transition-colors font-bold">
-                            Hapus
-                        </button>
-                    </td>
-                `;
-                tableBody.appendChild(tr);
-            });
-        };
-
-        window.askDelete = (id) => { activeId = id; deleteModal.classList.remove('hidden'); };
-        window.closeModal = () => { deleteModal.classList.add('hidden'); };
-        document.getElementById('confirmBtn').onclick = () => { 
-            if(window.deleteCitizen) window.deleteCitizen(activeId); 
-            closeModal(); 
-        };
-
-        window.exportExcel = () => {
-            const data = (typeof window.getDataWarga === 'function') ? window.getDataWarga() : [];
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Warga");
-            XLSX.writeFile(wb, "DataWarga.xlsx");
-        };
-    </script>
 </body>
 </html>
