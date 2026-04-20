@@ -17,47 +17,49 @@
         const supabaseKey = "sb_publishable_m0e2gJoMYRUYijTclkz-RA_WFg9ySq6"; 
         
         let supabaseClient = null; 
-        let dataWarga = [
-            { id: 1, Nama: "RASTIMAN", tipeWilayah: "RT", noWilayah: 1, alamat: "Desa Rambatan Wetan, Barat Blok A", hp: "087887346997", rekening: "-" },
-            { id: 2, Nama: "ENDI SUSANTO", tipeWilayah: "RW", noWilayah: 1, alamat: "Desa Rambatan Wetan Blok A", hp: "087862952268", rekening: "-" },
-            { id: 3, Nama: "SOLEH S", tipeWilayah: "RW", noWilayah: 2, alamat: "Desa Rambatan Wetan, Barat Blok A", hp: "081321574356", rekening: "-" },
-            { id: 4, Nama: "CARDAKA", tipeWilayah: "RT", noWilayah: 2, alamat: "Desa Rambatan Wetan Blok A", hp: "+62 859-6650-8839", rekening: "-" },
-            { id: 5, Nama: "ADE IRAWAN", tipeWilayah: "RW", noWilayah: 3, alamat: "Rambatan wetan blok B", hp: "085861718699", rekening: "-" },
-            { id: 6, Nama: "HASAN", tipeWilayah: "RT", noWilayah: 3, alamat: "Desa Rambatan Wetan, Barat Blok A", hp: "085942112378", rekening: "-" },
-            { id: 7, Nama: "TARKUDI", tipeWilayah: "RT", noWilayah: 4, alamat: "Desa Rambatan Wetan, Barat Blok A", hp: "085797901475", rekening: "-" },
-            { id: 8, Nama: "ROSUL HADIYANTO", tipeWilayah: "RW", noWilayah: 4, alamat: "Desa Rambatan Wetan Blok B", hp: "O81522793022", rekening: "-" },
-            { id: 9, Nama: "ABDUROHIM", tipeWilayah: "RW", noWilayah: 5, alamat: "Desa Rambatan Wetan, Balong Blok C", hp: "082126453501", rekening: "-" },
-            { id: 10, Nama: "SAKUDIN", tipeWilayah: "RT", noWilayah: 5, alamat: "Desa Rambatan Wetan, Barat Blok A", hp: "085798070713", rekening: "-" },
-            { id: 11, Nama: "RATNA", tipeWilayah: "RW", noWilayah: 6, alamat: "Desa Rambatan Wetan, Panggang Blok C", hp: "081904021042", rekening: "-" },
-            { id: 12, Nama: "RASWADI", tipeWilayah: "RT", noWilayah: 6, alamat: "Desa Rambatan Wetan, Barat Blok A", hp: "087757240470", rekening: "-" },
-            { id: 13, Nama: "CARITA", tipeWilayah: "RT", noWilayah: 7, alamat: "Desa Rambatan Wetan, Barat Blok A", hp: "083898182549", rekening: "-" },
-            { id: 14, Nama: "RASUDI", tipeWilayah: "RW", noWilayah: 7, alamat: "Desa Rambatan Wetan, Blok C", hp: "+6287852408999", rekening: "-" },
-            { id: 15, Nama: "TARUDIN", tipeWilayah: "RW", noWilayah: 8, alamat: "Desa Rambatan Wetan, Pecuk Blok B", hp: "087757403211", rekening: "-" },
-            { id: 16, Nama: "E. KUSNADI", tipeWilayah: "RT", noWilayah: 8, alamat: "Desa Rambatan Wetan Blok A", hp: "087836134115", rekening: "-" },
-            { id: 17, Nama: "CASITA", tipeWilayah: "RT", noWilayah: 9, alamat: "Desa Rambatan Wetan, Wanapraya Blok B", hp: "082119896080", rekening: "-" },
-            { id: 18, Nama: "TADI", tipeWilayah: "RT", noWilayah: 10, alamat: "Desa Rambatan Wetan, Blok B", hp: "081313643082", rekening: "-" },
-            { id: 19, Nama: "TADI", tipeWilayah: "RT", noWilayah: 11, alamat: "Desa Rambatan Wetan, Wanapraya Blok B", hp: "085724304717", rekening: "-" },
-            { id: 20, Nama: "SURYADI", tipeWilayah: "RT", noWilayah: 12, alamat: "Desa Rambatan Wetan, Wanapraya Blok B", hp: "+6281818473784", rekening: "-" },
-            { id: 21, Nama: "NONO KARSONO", tipeWilayah: "RT", noWilayah: 13, alamat: "Desa Rambatan Wetan, Blok B", hp: "08977114793", rekening: "-" },
-            { id: 22, Nama: "ABDUL KHOLIL", tipeWilayah: "RT", noWilayah: 14, alamat: "Desa Rambatan Wetan Blok B", hp: "0895326253275", rekening: "-" },
-            { id: 23, Nama: "NASAEDI", tipeWilayah: "RT", noWilayah: 15, alamat: "Desa Rambatan Wetan, Blok B", hp: "085221908019", rekening: "-" },
-            { id: 24, Nama: "DASUKI", tipeWilayah: "RT", noWilayah: 16, alamat: "Desa Rambatan Wetan, Balong Blok C", hp: "08989707470", rekening: "-" },
-            { id: 25, Nama: "RIYANTO", tipeWilayah: "RT", noWilayah: 17, alamat: "Desa Rambatan Wetan, Blok C", hp: "081219856798", rekening: "-" },
-            { id: 26, Nama: "KADNAWI", tipeWilayah: "RT", noWilayah: 18, alamat: "Rambatan Wetan Blok C", hp: "0813-3971-4263", rekening: "-" },
-            { id: 27, Nama: "NONO", tipeWilayah: "RT", noWilayah: 19, alamat: "Desa Rambatan Wetan, Blok C", hp: "+62895403035413", rekening: "-" },
-            { id: 28, Nama: "TADI", tipeWilayah: "RT", noWilayah: 20, alamat: "Desa Rambatan Wetan, Loa Blok C", hp: "082310371718", rekening: "-" },
-            { id: 29, Nama: "TAPING", tipeWilayah: "RT", noWilayah: 21, alamat: "Desa Rambatan Wetan, Loa Blok C", hp: "087858112367", rekening: "-" },
-            { id: 30, Nama: "WARJO", tipeWilayah: "RT", noWilayah: 22, alamat: "Desa Rambatan Wetan, Panggang Blok C", hp: "087878289658", rekening: "-" },
-            { id: 31, Nama: "DULANI", tipeWilayah: "RT", noWilayah: 23, alamat: "Desa Rambatan Wetan, Blok C", hp: "08224355146", rekening: "-" },
-            { id: 32, Nama: "CASWADI", tipeWilayah: "RT", noWilayah: 24, alamat: "Desa Rambatan Wetan, Karang Baru Blok C", hp: "0895-4285-68880", rekening: "-" },
-            { id: 33, Nama: "SUKI", tipeWilayah: "RT", noWilayah: 25, alamat: "Desa Rambatan Wetan, Karang Malang Blok C", hp: "087847474203", rekening: "-" },
-            { id: 34, Nama: "TARMIN", tipeWilayah: "RT", noWilayah: 26, alamat: "Desa Rambatan Wetan Blok C", hp: "08978391418", rekening: "-" },
-            { id: 35, Nama: "WARNITA", tipeWilayah: "RT", noWilayah: 27, alamat: "Desa Rambatan Wetan, Karang Malang Blok C", hp: "082128824668", rekening: "-" },
-            { id: 36, Nama: "SANUSI", tipeWilayah: "RT", noWilayah: 28, alamat: "Desa Rambatan Wetan, Jl. Kampungan Blok D", hp: "087825250221", rekening: "-" },
-            { id: 37, Nama: "SARBINI", tipeWilayah: "RT", noWilayah: 29, alamat: "Desa Rambatan Wetan, Pecuk Blok D", hp: "085134395331", rekening: "-" },
-            { id: 38, Nama: "SARNIJAH", tipeWilayah: "RT", noWilayah: 30, alamat: "Desa Rambatan Wetan Blok D", hp: "087817133110", rekening: "-" }
-        ]; 
         let session = null;
+        
+        // DATA DARI PDF (Data Awal/Fallback)
+        let dataWarga = [
+            { id: 1, Nama: "RASTIMAN", tipeWilayah: "RT", noWilayah: 1, rekening: "0158808064100", alamat: "Desa Rambatan Wetan, Barat Blok A", hp: "087887346997" },
+            { id: 2, Nama: "ENDI SUSANTO", tipeWilayah: "RW", noWilayah: 1, rekening: "0158867702100", alamat: "Desa Rambatan Wetan Blok A", hp: "087862952268" },
+            { id: 3, Nama: "SOLEH S", tipeWilayah: "RW", noWilayah: 2, rekening: "0102271750100", alamat: "Desa Rambatan Wetan, Barat Blok A", hp: "081321574356" },
+            { id: 4, Nama: "CARDAKA", tipeWilayah: "RT", noWilayah: 2, rekening: "0158866994100", alamat: "Desa Rambatan Wetan Blok A", hp: "085966508839" },
+            { id: 5, Nama: "ADE IRAWAN", tipeWilayah: "RW", noWilayah: 3, rekening: "0104764622100", alamat: "Rambatan wetan blok B", hp: "085861718699" },
+            { id: 6, Nama: "HASAN", tipeWilayah: "RT", noWilayah: 3, rekening: "0102287002100", alamat: "Desa Rambatan Wetan, Barat Blok A", hp: "085942112378" },
+            { id: 7, Nama: "TARKUDI", tipeWilayah: "RT", noWilayah: 4, rekening: "0102291921100", alamat: "Desa Rambatan Wetan, Barat Blok A", hp: "085797901475" },
+            { id: 8, Nama: "ROSUL HADIYANTO", tipeWilayah: "RW", noWilayah: 4, rekening: "0158740631100", alamat: "Desa Rambatan Wetan Blok B", hp: "081522793022" },
+            { id: 9, Nama: "ABDUROHIM", tipeWilayah: "RW", noWilayah: 5, rekening: "0158739437100", alamat: "Desa Rambatan Wetan, Balong Blok C", hp: "082126453501" },
+            { id: 10, Nama: "SAKUDIN", tipeWilayah: "RT", noWilayah: 5, rekening: "0108162181100", alamat: "Desa Rambatan Wetan, Barat Blok A", hp: "085798070713" },
+            { id: 11, Nama: "RATNA", tipeWilayah: "RW", noWilayah: 6, rekening: "0158742111100", alamat: "Desa Rambatan Wetan, Panggang Blok C", hp: "081904021042" },
+            { id: 12, Nama: "RASWADI", tipeWilayah: "RT", noWilayah: 6, rekening: "0147791895100", alamat: "Desa Rambatan Wetan, Barat Blok A", hp: "087757240470" },
+            { id: 13, Nama: "CARITA", tipeWilayah: "RT", noWilayah: 7, rekening: "0102285417100", alamat: "Desa Rambatan Wetan, Barat Blok A", hp: "083898182549" },
+            { id: 14, Nama: "RASUDI", tipeWilayah: "RW", noWilayah: 7, rekening: "0158777029100", alamat: "Desa Rambatan Wetan, Blok C", hp: "087852408999" },
+            { id: 15, Nama: "TARUDIN", tipeWilayah: "RW", noWilayah: 8, rekening: "0102272390100", alamat: "Desa Rambatan Wetan, Pecuk Blok B", hp: "087757403211" },
+            { id: 16, Nama: "E. KUSNADI", tipeWilayah: "RT", noWilayah: 8, rekening: "0158803623100", alamat: "Desa Rambatan Wetan Blok A", hp: "087836134115" },
+            { id: 17, Nama: "CASITA", tipeWilayah: "RT", noWilayah: 9, rekening: "0158862115100", alamat: "Desa Rambatan Wetan, Wanapraya Blok B", hp: "082119896080" },
+            { id: 18, Nama: "TADI", tipeWilayah: "RT", noWilayah: 10, rekening: "0158812037100", alamat: "Desa Rambatan Wetan, Blok B", hp: "081313643082" },
+            { id: 19, Nama: "TADI", tipeWilayah: "RT", noWilayah: 11, rekening: "0158805642100", alamat: "Desa Rambatan Wetan, Wanapraya Blok B", hp: "085724304717" },
+            { id: 20, Nama: "SURYADI", tipeWilayah: "RT", noWilayah: 12, rekening: "0158863545100", alamat: "Desa Rambatan Wetan, Wanapraya Blok B", hp: "081818473784" },
+            { id: 21, Nama: "NONO KARSONO", tipeWilayah: "RT", noWilayah: 13, rekening: "0158804281100", alamat: "Desa Rambatan Wetan, Blok B", hp: "08977114793" },
+            { id: 22, Nama: "ABDUL KHOLIL", tipeWilayah: "RT", noWilayah: 14, rekening: "0158810840100", alamat: "Desa Rambatan Wetan Blok B", hp: "0895326253275" },
+            { id: 23, Nama: "NASAEDI", tipeWilayah: "RT", noWilayah: 15, rekening: "0158807335100", alamat: "Desa Rambatan Wetan, Blok B", hp: "085221908019" },
+            { id: 24, Nama: "DASUKI", tipeWilayah: "RT", noWilayah: 16, rekening: "0158802317100", alamat: "Desa Rambatan Wetan, Balong Blok C", hp: "08989707470" },
+            { id: 25, Nama: "RIYANTO", tipeWilayah: "RT", noWilayah: 17, rekening: "0158801450100", alamat: "Desa Rambatan Wetan, Blok C", hp: "081219856798" },
+            { id: 26, Nama: "KADNAWI", tipeWilayah: "RT", noWilayah: 18, rekening: "0158864398100", alamat: "Rambatan Wetan Blok C", hp: "081339714263" },
+            { id: 27, Nama: "NONO", tipeWilayah: "RT", noWilayah: 19, rekening: "0158865440100", alamat: "Desa Rambatan Wetan, Blok C", hp: "0895403035413" },
+            { id: 28, Nama: "TADI", tipeWilayah: "RT", noWilayah: 20, rekening: "0158776383100", alamat: "Desa Rambatan Wetan, Loa Blok C", hp: "082310371718" },
+            { id: 29, Nama: "TAPING", tipeWilayah: "RT", noWilayah: 21, rekening: "0158740540100", alamat: "Desa Rambatan Wetan, Loa Blok C", hp: "087858112367" },
+            { id: 30, Nama: "WARJO", tipeWilayah: "RT", noWilayah: 22, rekening: "0158804875100", alamat: "Desa Rambatan Wetan, Panggang Blok C", hp: "087878289658" },
+            { id: 31, Nama: "DULANI", tipeWilayah: "RT", noWilayah: 23, rekening: "0158739976100", alamat: "Desa Rambatan Wetan, Blok C", hp: "08224355146" },
+            { id: 32, Nama: "CASWADI", tipeWilayah: "RT", noWilayah: 24, rekening: "0158772345101", alamat: "Desa Rambatan Wetan, Karang Baru Blok C", hp: "0895428568880" },
+            { id: 33, Nama: "SUKI", tipeWilayah: "RT", noWilayah: 25, rekening: "0158775662100", alamat: "Desa Rambatan Wetan, Karang Malang Blok C", hp: "087847474203" },
+            { id: 34, Nama: "TARMIN", tipeWilayah: "RT", noWilayah: 26, rekening: "0158744724100", alamat: "Desa Rambatan Wetan Blok C", hp: "08978391418" },
+            { id: 35, Nama: "WARNITA", tipeWilayah: "RT", noWilayah: 27, rekening: "0158743558100", alamat: "Desa Rambatan Wetan, Karang Malang, Blok C", hp: "082128824668" },
+            { id: 36, Nama: "SANUSI", tipeWilayah: "RT", noWilayah: 28, rekening: "0102269950100", alamat: "Desa Rambatan Wetan, Jl. Kampungan Blok D", hp: "087825250221" },
+            { id: 37, Nama: "SARBINI", tipeWilayah: "RT", noWilayah: 29, rekening: "0158881918100", alamat: "Desa Rambatan Wetan, Pecuk, Blok D", hp: "085134395331" },
+            { id: 38, Nama: "SARNIJAH", tipeWilayah: "RT", noWilayah: 30, rekening: "0158806241100", alamat: "Desa Rambatan Wetan Blok D", hp: "087817133110" }
+        ]; 
         
         // Inisialisasi Supabase
         if (supabaseUrl && supabaseKey) {
@@ -89,9 +91,10 @@
             }
         };
 
-        // Fungsi simpan data
+        // Fungsi simpan data yang disesuaikan dengan skema tabel: "Nama" (Huruf Besar)
         window.saveData = async (citizenData) => {
             if (supabaseClient) {
+                // Menyiapkan payload sesuai skema SQL: "Nama", "tipeWilayah", dll.
                 const payload = {
                     Nama: citizenData.nama,
                     tipeWilayah: citizenData.tipeWilayah,
@@ -105,24 +108,28 @@
                 
                 if (error) {
                     console.error("Error saving to Supabase:", error);
-                    alert("Gagal menyimpan ke database!");
+                    alert("Gagal menyimpan ke database! Pastikan RLS di Supabase mengizinkan insert.");
                 } else {
+                    // Refresh data setelah berhasil simpan
                     await window.fetchData();
                 }
             } else {
+                // Mode Lokal (jika API tidak tersedia)
                 const newData = { ...citizenData, Nama: citizenData.nama, id: Date.now() };
                 dataWarga.push(newData);
                 window.renderTable();
             }
         };
 
+        // Fungsi hapus data berdasarkan ID
         window.deleteCitizen = async (id) => {
-            if (supabaseClient && typeof id === 'string' && id.length > 10) {
+            if (supabaseClient) {
                 const { error } = await supabaseClient.from('Warga').delete().eq('id', id);
                 if (!error) {
                     await window.fetchData();
                 } else {
                     console.error("Delete error:", error);
+                    alert("Gagal menghapus data!");
                 }
             } else {
                 dataWarga = dataWarga.filter(w => w.id !== id);
@@ -130,17 +137,21 @@
             }
         };
 
+        // Ekspos data ke scope global untuk renderTable()
         window.getDataWarga = () => dataWarga;
 
+        // Logika Login Multi-Akses (Admin & Viewer)
         window.handleLogin = async (e) => {
             e.preventDefault();
             const userInp = document.getElementById('username').value;
             const passInp = document.getElementById('password').value;
             const errorMsg = document.getElementById('loginError');
 
+            // Admin Access
             if (userInp === "Ameth03" && passInp === "Ramwet03") {
                 loginSuccess('admin');
             } 
+            // Viewer Access
             else if (userInp === "Rtrw" && passInp === "Istimewa03") {
                 loginSuccess('viewer');
             }
@@ -182,32 +193,46 @@
                 appContent.classList.remove('hidden');
                 nav.classList.remove('hidden');
                 
+                // Sembunyikan form tambah jika role adalah viewer
                 if (session.role === 'viewer') {
                     formContainer.classList.add('hidden');
                 } else {
                     formContainer.classList.remove('hidden');
                 }
                 
+                // Re-render table untuk menyesuaikan aksi (tombol hapus)
                 window.renderTable();
             } else {
                 loginSection.classList.remove('hidden');
                 appContent.classList.add('hidden');
                 nav.classList.add('hidden');
+                document.getElementById('loginForm').reset();
+                document.getElementById('loginBtn').innerText = "Masuk Sekarang";
+                document.getElementById('loginBtn').disabled = false;
             }
         }
         
+        // Ekspos session role ke global
         window.getSessionRole = () => session ? session.role : null;
     </script>
 
     <script>
         // --- LOGIKA UI & TABEL ---
+        
         window.togglePassword = () => {
             const passwordInp = document.getElementById('password');
             const eyeOpen = document.getElementById('eyeOpen');
             const eyeClosed = document.getElementById('eyeClosed');
-            passwordInp.type = passwordInp.type === 'password' ? 'text' : 'password';
-            eyeOpen.classList.toggle('hidden');
-            eyeClosed.classList.toggle('hidden');
+            
+            if (passwordInp.type === 'password') {
+                passwordInp.type = 'text';
+                eyeOpen.classList.add('hidden');
+                eyeClosed.classList.remove('hidden');
+            } else {
+                passwordInp.type = 'password';
+                eyeOpen.classList.remove('hidden');
+                eyeClosed.classList.add('hidden');
+            }
         };
 
         window.renderTable = function() {
@@ -220,38 +245,52 @@
             tableBody.innerHTML = '';
             
             let filtered = rawData.filter(w => {
-                const currentName = (w.Nama || w.nama || "").toLowerCase();
-                const currentAlamat = (w.alamat || "").toLowerCase();
-                const currentRekening = (w.rekening || "").toLowerCase();
+                const currentName = w.Nama || w.nama || "";
+                const currentAlamat = w.alamat || "";
+                const nameMatch = currentName.toLowerCase().includes(search);
+                const accMatch = (w.rekening || "").includes(search);
+                const addressMatch = currentAlamat.toLowerCase().includes(search);
                 const typeMatch = filter === "Semua" || w.tipeWilayah === filter;
-                const searchMatch = currentName.includes(search) || currentAlamat.includes(search) || currentRekening.includes(search);
-                return searchMatch && typeMatch;
+                return (nameMatch || accMatch || addressMatch) && typeMatch;
             });
 
             if (filtered.length === 0) {
                 document.getElementById('emptyState').classList.remove('hidden');
             } else {
                 document.getElementById('emptyState').classList.add('hidden');
-                filtered.sort((a, b) => (a.noWilayah || 0) - (b.noWilayah || 0));
+                // Sorting: RW dulu baru RT, kemudian nomor wilayah
+                filtered.sort((a, b) => {
+                    if (a.tipeWilayah !== b.tipeWilayah) {
+                        return a.tipeWilayah === "RW" ? -1 : 1;
+                    }
+                    return (a.noWilayah || 0) - (b.noWilayah || 0);
+                });
 
                 filtered.forEach((w, i) => {
                     const tr = document.createElement('tr');
                     tr.className = "border-b hover:bg-blue-50/30 transition-colors";
                     
+                    // Tombol WA
                     const waNumber = (w.hp || '').replace(/[^0-9]/g, '');
-                    const waLink = waNumber ? `https://wa.me/${waNumber.startsWith('0') ? '62' + waNumber.slice(1) : (waNumber.startsWith('62') ? waNumber : '62' + waNumber)}` : '#';
-                    const deleteBtn = role === 'admin' ? `<button onclick="askDelete('${w.id}')" class="text-red-400 hover:text-red-600 font-bold px-2 py-1">Hapus</button>` : '';
+                    const waLink = waNumber ? `https://wa.me/${waNumber.startsWith('0') ? '62' + waNumber.slice(1) : waNumber}` : '#';
+                    
+                    // Tampilkan tombol hapus hanya untuk admin
+                    const deleteBtn = role === 'admin' ? `
+                        <button onclick="askDelete('${w.id}')" class="text-red-400 hover:text-red-600 font-bold px-2 py-1">
+                            Hapus
+                        </button>
+                    ` : '';
 
                     tr.innerHTML = `
                         <td class="px-4 py-3 border text-center text-xs text-gray-400">${i + 1}</td>
-                        <td class="px-4 py-3 border font-semibold">${w.Nama || w.nama}</td>
+                        <td class="px-4 py-3 border font-semibold uppercase text-[12px]">${w.Nama || w.nama}</td>
                         <td class="px-4 py-3 border text-center font-bold text-blue-700 text-xs">${w.tipeWilayah || ''} ${String(w.noWilayah || '').padStart(2, '0')}</td>
                         <td class="px-4 py-3 border font-mono text-xs text-gray-600">${w.rekening || '-'}</td>
-                        <td class="px-4 py-3 border text-xs text-gray-600 italic">${w.alamat || '-'}</td>
+                        <td class="px-4 py-3 border text-[11px] text-gray-600 italic">${w.alamat || '-'}</td>
                         <td class="px-4 py-3 border text-xs">${w.hp || '-'}</td>
                         <td class="px-4 py-3 border text-center no-print">
                             <div class="flex items-center justify-center gap-2">
-                                <a href="${waLink}" target="_blank" class="bg-green-500 text-white p-1.5 rounded-md hover:bg-green-600 transition-colors" title="WhatsApp">
+                                <a href="${waLink}" target="_blank" class="bg-green-500 text-white p-1.5 rounded-md hover:bg-green-600 transition-colors" title="Hubungi via WhatsApp">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.438 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
                                 </a>
                                 ${deleteBtn}
@@ -263,40 +302,67 @@
             }
         };
 
+        // Fungsi Ekspor & Print
         window.printDocument = () => {
             const date = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
-            document.getElementById('printDate').innerText = "Tanggal Cetak: " + date;
+            const printDateEl = document.getElementById('printDate');
+            if (printDateEl) printDateEl.innerText = "Tanggal Cetak: " + date;
             window.print();
         };
 
         window.downloadPDFA4 = () => {
-            const data = window.getDataWarga() || [];
+            const dataWarga = window.getDataWarga() || [];
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'mm', 'a4');
             const date = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
-            doc.text("DATA RT/RW DESA RAMBATAN WETAN", 105, 15, { align: 'center' });
+            
+            doc.setFontSize(16);
+            doc.text("LAPORAN DATA RT & RW DESA RAMBATAN WETAN", 105, 15, { align: 'center' });
+            doc.setFontSize(10);
+            doc.text(`Kecamatan Sindang - Tanggal: ${date}`, 105, 22, { align: 'center' });
+            
+            const rows = dataWarga.map((w, i) => [
+                i + 1, 
+                (w.Nama || w.nama).toUpperCase(), 
+                `${w.tipeWilayah} ${w.noWilayah}`, 
+                w.rekening, 
+                w.alamat || '-',
+                w.hp
+            ]);
+
             doc.autoTable({
                 head: [['No', 'Nama', 'Wilayah', 'Rekening', 'Alamat', 'HP']],
-                body: data.map((w, i) => [i + 1, w.Nama || w.nama, `${w.tipeWilayah} ${w.noWilayah}`, w.rekening, w.alamat, w.hp]),
-                startY: 25,
-                theme: 'grid'
+                body: rows,
+                startY: 30,
+                theme: 'grid',
+                headStyles: { fillColor: [30, 64, 175] },
+                styles: { fontSize: 8 }
             });
-            doc.save(`Data_Warga_${date}.pdf`);
+            doc.save(`Warga_Rambatan_Wetan_${date}.pdf`);
         };
 
         window.exportExcel = () => {
             const data = window.getDataWarga() || [];
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Data");
-            XLSX.writeFile(wb, "Data_Warga.xlsx");
+            XLSX.utils.book_append_sheet(wb, ws, "Data Warga");
+            XLSX.writeFile(wb, "DataWarga_RambatanWetan.xlsx");
         };
 
+        // Modal Hapus
         let activeId = null;
-        window.askDelete = (id) => { activeId = id; document.getElementById('deleteModal').classList.remove('hidden'); };
+        window.askDelete = (id) => { 
+            activeId = id; 
+            document.getElementById('deleteModal').classList.remove('hidden'); 
+        };
         window.closeModal = () => { document.getElementById('deleteModal').classList.add('hidden'); };
-        window.confirmDelete = () => { window.deleteCitizen(activeId); closeModal(); };
+        
+        window.confirmDelete = () => {
+            if(window.deleteCitizen) window.deleteCitizen(activeId);
+            closeModal();
+        };
 
+        // Listener Form
         window.onload = () => {
             document.getElementById('dataForm').addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -308,8 +374,10 @@
                     hp: document.getElementById('hp').value,
                     alamat: document.getElementById('alamat').value
                 };
-                window.saveData(formData);
-                this.reset();
+                if(window.saveData) {
+                    window.saveData(formData);
+                    this.reset();
+                }
             });
         };
     </script>
@@ -322,6 +390,8 @@
             #appContent { display: block !important; }
             #printHeader { display: block !important; }
             body { background: white; }
+            .container { max-width: 100% !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            table { font-size: 10px; }
         }
     </style>
 </head>
@@ -329,28 +399,38 @@
 
     <header id="mainNav" class="bg-blue-800 text-white p-4 shadow-md hidden no-print">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-lg font-bold">RAMBATAN WETAN</h1>
-            <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 px-4 py-1.5 rounded-lg text-sm font-semibold">Keluar</button>
+            <h1 class="text-lg font-bold tracking-tight">RAMBATAN WETAN</h1>
+            <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors">Keluar</button>
         </div>
     </header>
 
     <div id="loginSection" class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full border">
+        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full border border-gray-100">
             <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002-2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
             </div>
-            <h2 class="text-2xl font-bold text-center mb-6">Akses Sistem</h2>
+            <h2 class="text-2xl font-bold text-gray-800 text-center mb-1">Akses Sistem</h2>
+            <p class="text-gray-500 text-center mb-6 text-sm">Gunakan kredensial Anda.</p>
+            
             <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
-                <input type="text" id="username" placeholder="Username" required class="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500">
-                <div class="relative">
-                    <input type="password" id="password" placeholder="Password" required class="w-full border rounded-xl px-4 py-3 pr-12 outline-none focus:ring-2 focus:ring-blue-500">
-                    <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400">
-                        <svg id="eyeOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                        <svg id="eyeClosed" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/></svg>
-                    </button>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Username</label>
+                    <input type="text" id="username" required class="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Password</label>
+                    <div class="relative">
+                        <input type="password" id="password" required class="w-full border rounded-xl px-4 py-3 pr-12 outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                        <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400">
+                            <svg id="eyeOpen" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            <svg id="eyeClosed" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"></path></svg>
+                        </button>
+                    </div>
                 </div>
                 <div id="loginError" class="hidden text-red-500 text-xs text-center font-semibold italic"></div>
-                <button id="loginBtn" type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold shadow-lg mt-2">Masuk</button>
+                <button id="loginBtn" type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg mt-2">
+                    Masuk Sekarang
+                </button>
             </form>
         </div>
     </div>
@@ -362,8 +442,11 @@
         </div>
 
         <main class="container mx-auto p-4 md:p-8">
-            <div id="dataFormContainer" class="bg-white rounded-xl shadow-sm p-6 mb-8 border no-print">
-                <h2 class="text-lg font-bold mb-4 text-blue-800">Tambah Data Baru</h2>
+            <div id="dataFormContainer" class="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-200 no-print">
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-blue-800">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Tambah Data Baru
+                </h2>
                 <form id="dataForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <input type="text" id="nama" placeholder="Nama Lengkap" required class="border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500">
                     <div class="flex gap-2">
@@ -373,27 +456,27 @@
                         </select>
                         <input type="number" id="noWilayah" placeholder="No" required class="border rounded-lg p-2.5 w-1/3 outline-none">
                     </div>
-                    <input type="text" id="rekening" placeholder="Nomor Rekening" required class="border rounded-lg p-2.5 outline-none">
-                    <input type="text" id="hp" placeholder="No HP" required class="border rounded-lg p-2.5 outline-none">
-                    <input type="text" id="alamat" placeholder="Alamat" required class="border rounded-lg p-2.5 md:col-span-2 outline-none">
-                    <button type="submit" class="bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors">Simpan Data</button>
+                    <input type="text" id="rekening" placeholder="Nomor Rekening" required class="border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="hp" placeholder="No HP" required class="border rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="alamat" placeholder="Alamat Lengkap" required class="border rounded-lg p-2.5 md:col-span-2 outline-none focus:ring-2 focus:ring-blue-500">
+                    <button type="submit" class="bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-md">Simpan Data</button>
                 </form>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="p-4 bg-gray-50 border-b flex flex-col md:flex-row justify-between items-center gap-4 no-print">
                     <div class="flex gap-2 w-full md:w-auto">
-                        <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="Cari..." class="border rounded-lg px-4 py-1.5 text-sm outline-none w-full">
+                        <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="Cari nama, rekening, atau alamat..." class="border rounded-lg px-4 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none w-full">
                         <select id="filterWilayah" onchange="renderTable()" class="border rounded-lg px-2 py-1.5 text-sm bg-white outline-none">
-                            <option value="Semua">Semua</option>
-                            <option value="RW">RW</option>
-                            <option value="RT">RT</option>
+                            <option value="Semua">Semua Wilayah</option>
+                            <option value="RW">RW Saja</option>
+                            <option value="RT">RT Saja</option>
                         </select>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                        <button onclick="printDocument()" class="bg-white border px-4 py-1.5 rounded-lg text-xs font-bold">CETAK</button>
-                        <button onclick="downloadPDFA4()" class="bg-red-50 text-red-600 border px-4 py-1.5 rounded-lg text-xs font-bold">PDF</button>
-                        <button onclick="exportExcel()" class="bg-green-50 text-green-600 border px-4 py-1.5 rounded-lg text-xs font-bold">EXCEL</button>
+                        <button onclick="printDocument()" class="bg-white border px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-gray-50">CETAK</button>
+                        <button onclick="downloadPDFA4()" class="bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100">PDF</button>
+                        <button onclick="exportExcel()" class="bg-green-50 text-green-600 border border-green-200 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-green-100">EXCEL</button>
                     </div>
                 </div>
 
@@ -413,17 +496,22 @@
                         <tbody id="tableBody" class="text-sm text-gray-700"></tbody>
                     </table>
                 </div>
-                <div id="emptyState" class="p-12 text-center text-gray-400 hidden italic">Data tidak ditemukan.</div>
+                <div id="emptyState" class="p-12 text-center text-gray-400 hidden italic">Belum ada data tersedia.</div>
             </div>
         </main>
     </div>
 
+    <!-- Modal Konfirmasi Hapus -->
     <div id="deleteModal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl p-6 max-w-xs w-full text-center">
-            <h3 class="font-bold text-lg mb-6">Hapus Data?</h3>
+        <div class="bg-white rounded-2xl p-6 max-w-xs w-full shadow-2xl text-center">
+            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </div>
+            <h3 class="font-bold text-gray-800 text-lg mb-1">Hapus Data?</h3>
+            <p class="text-gray-500 text-xs mb-6">Tindakan ini tidak dapat dibatalkan.</p>
             <div class="flex gap-2">
-                <button onclick="closeModal()" class="flex-1 py-2 text-gray-500 font-semibold">Batal</button>
-                <button onclick="confirmDelete()" class="flex-1 py-2 bg-red-500 text-white rounded-lg font-bold">Hapus</button>
+                <button onclick="closeModal()" class="flex-1 py-2 text-gray-500 font-semibold hover:bg-gray-50 rounded-lg">Batal</button>
+                <button onclick="confirmDelete()" class="flex-1 py-2 bg-red-500 text-white rounded-lg font-bold hover:bg-red-600 transition-colors">Ya, Hapus</button>
             </div>
         </div>
     </div>
